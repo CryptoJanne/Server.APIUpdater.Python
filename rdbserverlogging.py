@@ -6,7 +6,7 @@ import datetime
 import configparser
 
 
-class ServerData(object):
+class SystemStats(object):
     def __init__(self, Cpu, Gpu, Memory, HardDrive1, HardDrive2, tid):
         self.Cpu = Cpu
         self.Gpu = Gpu
@@ -88,11 +88,11 @@ class RunTheLogging:
         disk2 = HardDrive(bytes2human(disk2usage.total), bytes2human(disk2usage.used), bytes2human(disk2usage.free), disk2usage.percent)
 
         now = datetime.datetime.now()
-        time_string = now.strftime("%Y/%m/%d %H:%M:%S")
+        time_string = now.isoformat()
         deletedate = now + datetime.timedelta(hours=5)
         DateTime_in_ISOFormat = deletedate.isoformat()
 
-        dataentry = ServerData(cpu, gpu, memory, disk1, disk2, time_string)
+        dataentry = SystemStats(cpu, gpu, memory, disk1, disk2, time_string)
 
         config = configparser.ConfigParser()
         config.read('config.ini')
@@ -108,5 +108,6 @@ class RunTheLogging:
         with store.open_session() as session:
             session.store(dataentry)
             metadata = session.advanced.get_metadata_for(dataentry)
+            metadata["@collection"] = "SystemStats"
             metadata["@expires"] = DateTime_in_ISOFormat
             session.save_changes()
